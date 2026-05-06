@@ -1,11 +1,12 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import User from "./models/User.js"; 
+import User from "./models/User.js";
 import Task from "./models/Task.js";
 
 const app = express();
 
+// ✅ CORS
 app.use(cors({
   origin: [
     "http://localhost:3000",
@@ -13,20 +14,28 @@ app.use(cors({
   ],
   credentials: true
 }));
+
 app.use(express.json());
 
-// test route
+// ✅ Test route
 app.get("/", (req, res) => {
-  res.send("Backend running ");
+  res.send("Backend running 🚀");
 });
 
-// MongoDB connect
-mongoose.connect("mongodb://127.0.0.1:27017/todo-app")
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+// ✅ ENV-based MongoDB connection
+const MONGO_URI =
+  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/todo-app";
 
+mongoose.connect(MONGO_URI)
+  .then(() => console.log("MongoDB connected ✅"))
+  .catch((err) => console.log("Mongo error:", err));
+
+
+// ================= AUTH =================
+
+// SIGNUP
 app.post("/signup", async (req, res) => {
-  const { name, email, password } = req.body;  // 🔥 ADD name
+  const { name, email, password } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -35,29 +44,42 @@ app.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const user = new User({ name, email, password }); // 🔥 ADD name
+    const user = new User({ name, email, password });
     await user.save();
 
     res.json({ message: "Signup successful ✅" });
 
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.log("Signup error:", err); // 🔥 debug
+    res.status(500).json({ message: err.message });
   }
 });
+
+// LOGIN
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email, password });
+    const user = await User.findOne({ email, password });
 
-  if (user) {
-    res.json({
-      message: "Login success",
-      name: user.name
-    });
-  } else {
-    res.status(400).json({ message: "Invalid credentials" });
+    if (user) {
+      res.json({
+        message: "Login success",
+        name: user.name
+      });
+    } else {
+      res.status(400).json({ message: "Invalid credentials" });
+    }
+
+  } catch (err) {
+    console.log("Login error:", err);
+    res.status(500).json({ message: err.message });
   }
 });
+
+
+// ================= TASKS =================
+
 // ADD TASK
 app.post("/add-task", async (req, res) => {
   try {
@@ -75,9 +97,10 @@ app.post("/add-task", async (req, res) => {
     });
 
     await task.save();
-
     res.json(task);
+
   } catch (err) {
+    console.log("Add task error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -85,10 +108,10 @@ app.post("/add-task", async (req, res) => {
 // GET TASKS
 app.get("/tasks", async (req, res) => {
   try {
-    const tasks = await Task.find().sort({ ticketNumber: 1 }); // 🔥 sorted
-
+    const tasks = await Task.find().sort({ ticketNumber: 1 });
     res.json(tasks);
   } catch (err) {
+    console.log("Fetch tasks error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -101,31 +124,41 @@ app.put("/update-task/:id", async (req, res) => {
       req.body,
       { new: true }
     );
-
     res.json(updated);
   } catch (err) {
+    console.log("Update task error:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
+// DELETE TASK
 app.delete("/delete-task/:id", async (req, res) => {
   try {
     await Task.findByIdAndDelete(req.params.id);
     res.json({ message: "Deleted" });
   } catch (err) {
-    res.status(500).json(err);
+    console.log("Delete task error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
+
+// GET SINGLE TASK
 app.get("/task/:id", async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
     res.json(task);
   } catch (err) {
-    res.status(500).json(err);
+    console.log("Get task error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
 
-// start server
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+// ================= SERVER =================
+
+// ✅ Works both locally & Render
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT} 🚀`);
 });
