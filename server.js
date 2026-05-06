@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import User from "./models/user.js"; 
+import User from "./models/User.js"; 
 import Task from "./models/Task.js";
 
 const app = express();
@@ -9,7 +9,7 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:3000",
-    "https://your-netlify-site.netlify.app"
+    "https://sweet-kitsune-5d05e0.netlify.app"
   ],
   credentials: true
 }));
