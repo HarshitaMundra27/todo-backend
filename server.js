@@ -7,6 +7,8 @@ import Task from "./models/Task.js";
 import Notification from "./models/Notification.js";
 
 import cron from "node-cron";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 
@@ -39,15 +41,13 @@ const MONGO_URI =
   process.env.MONGO_URI ||
   "mongodb://127.0.0.1:27017/todo-app";
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() =>
-    console.log("MongoDB connected ✅")
-  )
-  .catch((err) =>
-    console.log("Mongo error:", err)
-  );
-
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected ✅");
+  })
+  .catch((err) => {
+    console.log("Mongo error:", err);
+  });
 
 // ================= AUTH =================
 
