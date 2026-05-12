@@ -370,42 +370,50 @@ app.get("/tasks/:userId", async (req, res) => {
 
     const { userId } = req.params;
 
-    const {
+   const {
 
-      page = 1,
+  page = 1,
 
-      limit = 10,
+  limit = 10,
 
-      ticket = "",
+  search = ""
 
-      title = "",
+} = req.query;
 
-      description = ""
+   const filter = {
 
-    } = req.query;
+  userId,
 
-    /* FILTER */
+  ...(search && {
 
-    const filter = {
+    $or: [
 
-      userId,
-
-      ...(ticket && {
-        ticketNumber: Number(ticket)
-      }),
-
-      title: {
-        $regex: title,
-        $options: "i"
+      {
+        title: {
+          $regex: search,
+          $options: "i"
+        }
       },
 
-      description: {
-        $regex: description,
-        $options: "i"
+      {
+        description: {
+          $regex: search,
+          $options: "i"
+        }
+      },
+
+      {
+        ticketNumber:
+          isNaN(search)
+            ? -1
+            : Number(search)
       }
 
-    };
+    ]
 
+  })
+
+};
     /* TASKS */
 
     const tasks = await Task.aggregate([
