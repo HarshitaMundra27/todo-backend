@@ -5,12 +5,13 @@ import cors from "cors";
 import User from "./models/User.js";
 import Task from "./models/Task.js";
 import Notification from "./models/Notification.js";
+import morgan from "morgan"
 
 import cron from "node-cron";
-import dotenv from "dotenv";
-dotenv.config();
+
 
 const app = express();
+app.use(morgan("dev"));
 
 
 // ================= CORS =================
@@ -19,7 +20,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://bucolic-cuchufli-c4e457.netlify.app"
+      "https://adorable-cupcake-8d739b.netlify.app"
     ],
     credentials: true
   })
@@ -41,13 +42,15 @@ const MONGO_URI =
   process.env.MONGO_URI ||
   "mongodb://127.0.0.1:27017/todo-app";
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected ✅");
-  })
-  .catch((err) => {
-    console.log("Mongo error:", err);
-  });
+mongoose
+  .connect(MONGO_URI)
+  .then(() =>
+    console.log("MongoDB connected ✅")
+  )
+  .catch((err) =>
+    console.log("Mongo error:", err)
+  );
+
 
 // ================= AUTH =================
 
@@ -370,50 +373,50 @@ app.get("/tasks/:userId", async (req, res) => {
 
     const { userId } = req.params;
 
-   const {
+    const {
 
-  page = 1,
+      page = 1,
 
-  limit = 10,
+      limit = 10,
 
-  search = ""
+      search = ""
 
-} = req.query;
+    } = req.query;
 
-   const filter = {
+    const filter = {
 
-  userId,
+      userId,
 
-  ...(search && {
+      ...(search && {
 
-    $or: [
+        $or: [
 
-      {
-        title: {
-          $regex: search,
-          $options: "i"
-        }
-      },
+          {
+            title: {
+              $regex: search,
+              $options: "i"
+            }
+          },
 
-      {
-        description: {
-          $regex: search,
-          $options: "i"
-        }
-      },
+          {
+            description: {
+              $regex: search,
+              $options: "i"
+            }
+          },
 
-      {
-        ticketNumber:
-          isNaN(search)
-            ? -1
-            : Number(search)
-      }
+          {
+            ticketNumber:
+              isNaN(search)
+                ? -1
+                : Number(search)
+          }
 
-    ]
+        ]
 
-  })
+      })
 
-};
+    };
     /* TASKS */
 
     const tasks = await Task.aggregate([
@@ -552,7 +555,7 @@ app.put("/update-task/:id", async (req, res) => {
     );
 
     res.status(500).json({
-      error: err.message 
+      error: err.message
     });
 
   }
