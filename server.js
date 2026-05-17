@@ -20,7 +20,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://adorable-cupcake-8d739b.netlify.app"
+      "https://cheery-cuchufli-c92652.netlify.app"
     ],
     credentials: true
   })
